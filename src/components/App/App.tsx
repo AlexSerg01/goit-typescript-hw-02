@@ -7,7 +7,7 @@ import Loader from "../Loader/Loader";
 import ImageModal from "../ImageModal/ImageModal";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 
-interface ImageData {
+export interface ImageData {
   id: number;
   urls: {
     small: string;
@@ -20,7 +20,7 @@ interface ImageData {
   };
 }
 
-interface ModalData {
+export interface ModalData {
   id: number;
   urls: {
     regular: string;
@@ -66,7 +66,20 @@ const App: React.FC = () => {
               scroll();
             }, 100);
           }
-          setImgs((prevImgs) => [...prevImgs, ...data.results]);
+          // Переконайтеся, що дані мають правильний тип
+          const imageData: ImageData[] = data.results.map((item: any) => ({
+            id: item.id,
+            urls: {
+              small: item.urls.small,
+              regular: item.urls.regular,
+              alt_description: item.alt_description,
+            },
+            description: item.description,
+            user: {
+              username: item.user.username,
+            },
+          }));
+          setImgs((prevImgs) => [...prevImgs, ...imageData]);
           setTotalPages(data.total_pages);
         } catch (error) {
           setLoader(false);

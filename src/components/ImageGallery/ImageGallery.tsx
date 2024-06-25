@@ -1,49 +1,29 @@
-import React, { forwardRef } from "react";
-import ImageCard from "../ImageCard/ImageCard";
-import css from "./ImageGallery.module.css";
-
-// Додайте або імпортуйте оголошення ModalData тут
-interface ModalData {
-  id: number;
-  urls: {
-    small: string;
-    regular: string;
-    alt_description: string;
-  };
-  description?: string;
-  user: {
-    username: string;
-  };
-}
+import React from "react";
+import { ImageData, ModalData } from "../App/App";
 
 interface ImageGalleryProps {
-  data: {
-    id: number;
-    urls: {
-      small: string;
-      regular: string;
-      alt_description: string;
-    };
-    description?: string;
-    user: {
-      username: string;
-    };
-  }[];
-  openModal: (data: ModalData) => void; // Ensure openModal is typed correctly
+  data: ImageData[];
+  openModal: (data: ModalData) => void;
 }
 
-const ImageGallery = forwardRef<HTMLUListElement, ImageGalleryProps>(
-  function ImageGalleryComponent({ data, openModal }, ref) {
+const ImageGallery = React.forwardRef<HTMLUListElement, ImageGalleryProps>(
+  ({ data, openModal }, ref) => {
     return (
-      <ul ref={ref} className={css.imgList}>
-        {data.map((item) => (
-          <li key={item.id} className={css.imgItem}>
-            <ImageCard
-              url={item.urls.small}
-              name={item.urls.alt_description}
-              fullInfo={item}
-              openModal={() => openModal(item as ModalData)} // Надання правильного типу даних для openModal
-            />
+      <ul ref={ref}>
+        {data.map((image) => (
+          <li
+            key={image.id}
+            onClick={() =>
+              openModal({
+                id: image.id,
+                urls: { regular: image.urls.regular },
+                alt_description: image.urls.alt_description,
+                description: image.description,
+                user: { username: image.user.username },
+              })
+            }
+          >
+            <img src={image.urls.small} alt={image.urls.alt_description} />
           </li>
         ))}
       </ul>

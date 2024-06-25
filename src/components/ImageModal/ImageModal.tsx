@@ -1,6 +1,7 @@
 import React from "react";
 import Modal from "react-modal";
 import css from "./ImageModal.module.css";
+import { ModalData } from "../App/App"; // Import the ModalData type
 
 const overlayStyles: React.CSSProperties = {
   position: "fixed",
@@ -29,16 +30,7 @@ const contentStyles: React.CSSProperties = {
 Modal.setAppElement("#root");
 
 interface ImageModalProps {
-  info: {
-    description?: string;
-    urls: {
-      regular: string;
-    };
-    alt_description: string;
-    user: {
-      username: string;
-    };
-  };
+  info: ModalData; // Use the imported type
   isOpen: boolean;
   onRequestClose: () => void;
 }

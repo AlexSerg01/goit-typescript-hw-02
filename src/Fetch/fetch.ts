@@ -1,6 +1,14 @@
 import axios from "axios";
 
-export default async function fetch(searchWord, page) {
+interface FetchResponse {
+  results: ImageData[];
+  total_pages: number;
+}
+
+export default async function fetch(
+  searchWord: string,
+  page: number
+): Promise<FetchResponse> {
   const BASE_URL = `https://api.unsplash.com/search/photos`;
 
   const params = {
@@ -14,6 +22,6 @@ export default async function fetch(searchWord, page) {
     "Accept-Version": "v1",
   };
 
-  const data = await axios.get(BASE_URL, { params, headers });
-  return data.data;
+  const { data } = await axios.get(BASE_URL, { params, headers });
+  return data;
 }
