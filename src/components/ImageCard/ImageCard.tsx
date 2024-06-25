@@ -1,23 +1,16 @@
-import React from "react";
+import { FC } from "react";
+import { ImageCardProps } from "./ImageCard.types";
 
-interface ImageCardProps {
-  url: string;
-  name: string;
-  fullInfo: object;
-  openModal: (info: object) => void;
-}
-
-const ImageCard: React.FC<ImageCardProps> = ({
-  url,
-  name,
-  fullInfo,
-  openModal,
-}) => {
-  const clickHandler = () => {
+const ImageCard: FC<ImageCardProps> = ({ url, name, fullInfo, openModal }) => {
+  function clickHandler(): void {
     openModal(fullInfo);
-  };
+  }
 
-  return <img onClick={clickHandler} src={url} alt={name} />;
+  return (
+    <>
+      <img onClick={clickHandler} src={url} alt={name} />
+    </>
+  );
 };
 
 export default ImageCard;

@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
+
 import SearchBar from "../SearchBar/SearchBar";
 import fetch from "../../Fetch/fetch";
 import ImageGallery from "../ImageGallery/ImageGallery";
@@ -7,126 +8,107 @@ import Loader from "../Loader/Loader";
 import ImageModal from "../ImageModal/ImageModal";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 
-export interface ImageData {
-  id: number;
-  urls: {
-    small: string;
-    regular: string;
-    alt_description: string;
-  };
-  description?: string;
-  user: {
-    username: string;
-  };
-}
+import * as AT from "./App.types";
+import { FetchType } from "../../Fetch/fetch.types";
 
-export interface ModalData {
-  id: number;
-  urls: {
-    regular: string;
-  };
-  alt_description: string;
-  description?: string;
-  user: {
-    username: string;
-  };
-}
-
-const App: React.FC = () => {
-  const [imgs, setImgs] = useState<ImageData[]>([]);
+export default function App() {
+  const [imgs, setImgs] = useState<AT.Imgs | null>(null);
   const [page, setPage] = useState<number>(1);
   const [keyWord, setKeyWord] = useState<string>("");
   const [totalPages, setTotalPages] = useState<number>(0);
   const [loader, setLoader] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
   const [modalIsOpen, setIsOpen] = useState<boolean>(false);
-  const [dataModal, setDataModal] = useState<ModalData | null>(null);
+  const [dataModal, setDataModal] = useState<AT.Img | null>(null);
+  // --------------------------------------------
   const imgRef = useRef<HTMLUListElement | null>(null);
 
-  const submitHandler = (value: string) => {
+  function submitHandler(value: string): void {
     setKeyWord(value);
     setPage(1);
     setImgs([]);
-  };
+  }
 
-  const clickHandler = () => {
-    setPage((prevPage) => prevPage + 1);
-  };
+  function clickHandler(): void {
+    setPage(page + 1);
+  }
 
   useEffect(() => {
-    const onFetch = async () => {
+    async function onFetch() {
       if (keyWord) {
         try {
           setLoader(true);
-          const data = await fetch(keyWord, page);
+          const data = await fetch<FetchType>(keyWord, page);
+          setTotalPages(0);
           setError(false);
           setLoader(false);
-          if (page > 1) {
+          // лишив перевірку для запуску таймауту
+          page > 1 &&
             setTimeout(() => {
               scroll();
             }, 100);
-          }
-          // Переконайтеся, що дані мають правильний тип
-          const imageData: ImageData[] = data.results.map((item: any) => ({
-            id: item.id,
-            urls: {
-              small: item.urls.small,
-              regular: item.urls.regular,
-              alt_description: item.alt_description,
-            },
-            description: item.description,
-            user: {
-              username: item.user.username,
-            },
-          }));
-          setImgs((prevImgs) => [...prevImgs, ...imageData]);
+          setImgs((prevImgs) => {
+            if (prevImgs === null) {
+              return [...data.results];
+            } else {
+              return [...prevImgs, ...data.results];
+            }
+          });
           setTotalPages(data.total_pages);
         } catch (error) {
           setLoader(false);
           setError(true);
         }
       }
-    };
+    }
     onFetch();
   }, [keyWord, page]);
 
-  const openModal = (data: ModalData): void => {
+  function openModal(data: AT.Img): void {
     setIsOpen(true);
     setDataModal(data);
-  };
+  }
 
-  const closeModal = () => {
+  function closeModal(): void {
     setIsOpen(false);
-  };
+    setDataModal(null);
+  }
 
-  const scroll = () => {
-    if (imgRef.current?.childNodes?.[0]) {
+  function scroll(): void {
+    const childNode = imgRef.current?.childNodes?.[0] as HTMLElement;
+    imgRef.current?.childNodes?.[0] &&
       window.scrollBy({
-        top:
-          (imgRef.current.childNodes[0] as HTMLElement).getBoundingClientRect()
-            .height * 2,
+        top: childNode.getBoundingClientRect().height * 2,
         left: 0,
         behavior: "smooth",
       });
-    }
-  };
+  }
 
   return (
     <>
-      <SearchBar onFind={submitHandler} />
+      <SearchBar onFind={submitHandler}></SearchBar>
       {modalIsOpen && dataModal && (
         <ImageModal
           info={dataModal}
           isOpen={modalIsOpen}
           onRequestClose={closeModal}
-        />
+        ></ImageModal>
       )}
-      {error && <ErrorMessage />}
-      <ImageGallery data={imgs} openModal={openModal} ref={imgRef} />
-      {loader && <Loader />}
-      {totalPages > page && <LoadMoreBtn onLoadMore={clickHandler} />}
+      {error && <ErrorMessage></ErrorMessage>}
+
+      {imgs ? (
+        <ImageGallery
+          data={imgs}
+          openModal={openModal}
+          ref={imgRef}
+        ></ImageGallery>
+      ) : (
+        <></>
+      )}
+      {loader && <Loader></Loader>}
+      {totalPages > page && (
+        <LoadMoreBtn onLoadMore={clickHandler}></LoadMoreBtn>
+      )}
     </>
   );
-};
-
-export default App;
+}

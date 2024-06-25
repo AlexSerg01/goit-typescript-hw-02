@@ -1,5 +1,17 @@
-import React from "react";
+import { FC } from "react";
+import css from "./Loader.module.css";
 
-const Loader: React.FC = () => <div>Loading...</div>;
+import { BallTriangle } from "react-loader-spinner";
+
+const Loader: FC = () => {
+  return (
+    <BallTriangle
+      height={100}
+      color="#blueviolet"
+      ariaLabel="ball-triangle-loading"
+      wrapperClass={css.loader}
+    ></BallTriangle>
+  );
+};
 
 export default Loader;
